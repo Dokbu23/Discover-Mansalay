@@ -1,0 +1,164 @@
+[
+    {
+        "file":  "images/ACCOMMODATIONS/carishiela-lodging-house.jpg",
+        "category":  "ACCOMMODATIONS",
+        "title":  "Carishiela Lodging House",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/ACCOMMODATIONS/mansalay-food-house-and-lodging.jpg",
+        "category":  "ACCOMMODATIONS",
+        "title":  "Mansalay Food House And Lodging",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/ACCOMMODATIONS/nel-travellers-inn.avif",
+        "category":  "ACCOMMODATIONS",
+        "title":  "Nel Travellers Inn",
+        "extension":  "avif"
+    },
+    {
+        "file":  "images/ACCOMMODATIONS/nel-travellers-inn.jpg",
+        "category":  "ACCOMMODATIONS",
+        "title":  "Nel Travellers Inn",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/attraction/buktot-beach.jpg",
+        "category":  "attraction",
+        "title":  "Buktot Beach",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/attraction/mangyan-burial-cave.jpg",
+        "category":  "attraction",
+        "title":  "Mangyan Burial Cave",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/attraction/mangyan-village.jpg",
+        "category":  "attraction",
+        "title":  "Mangyan Village",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/attraction/oriental-mindoro-heritage-and-cultural-center.png",
+        "category":  "attraction",
+        "title":  "Oriental Mindoro Heritage And Cultural Center",
+        "extension":  "png"
+    },
+    {
+        "file":  "images/beach and resorts/footprints-beach-resort.jpg",
+        "category":  "beach and resorts",
+        "title":  "Footprints Beach Resort",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/go-beach-resort.jpg",
+        "category":  "beach and resorts",
+        "title":  "Go Beach Resort",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/lasersita-casitas.jpg",
+        "category":  "beach and resorts",
+        "title":  "Lasersita Casitas",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/mahalta-glamping.jpg",
+        "category":  "beach and resorts",
+        "title":  "Mahalta Glamping",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/mb-hiraya-beach-resort.jpg",
+        "category":  "beach and resorts",
+        "title":  "Mb Hiraya Beach Resort",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/mega-buena.jpg",
+        "category":  "beach and resorts",
+        "title":  "Mega Buena",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/pgd-beach.jpg",
+        "category":  "beach and resorts",
+        "title":  "Pgd Beach",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/sidell-beach.jpg",
+        "category":  "beach and resorts",
+        "title":  "Sidell Beach",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/sidell-kite.jpg",
+        "category":  "beach and resorts",
+        "title":  "Sidell Kite",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/sky-and-shore.jpg",
+        "category":  "beach and resorts",
+        "title":  "Sky And Shore",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/beach and resorts/teresa-by-the-sea.png",
+        "category":  "beach and resorts",
+        "title":  "Teresa By The Sea",
+        "extension":  "png"
+    },
+    {
+        "file":  "images/DINING/natures-gift-garden.jpg",
+        "category":  "DINING",
+        "title":  "Natures Gift Garden",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/DINING/princess-ayline-bed-and-breakfast.jpg",
+        "category":  "DINING",
+        "title":  "Princess Ayline Bed And Breakfast",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/discover-mansalay-logo.jpg",
+        "category":  "images",
+        "title":  "Discover Mansalay Logo",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/mansalay-cover.png",
+        "category":  "images",
+        "title":  "Mansalay Cover",
+        "extension":  "png"
+    },
+    {
+        "file":  "images/mansalay-cover-alt.png",
+        "category":  "images",
+        "title":  "Mansalay Cover Alt",
+        "extension":  "png"
+    },
+    {
+        "file":  "images/MOUNTAIN AND FARM RESORTS/melzar-mountain.jpg",
+        "category":  "MOUNTAIN AND FARM RESORTS",
+        "title":  "Melzar Mountain",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/MOUNTAIN AND FARM RESORTS/rc-farm-and-resort.jpg",
+        "category":  "MOUNTAIN AND FARM RESORTS",
+        "title":  "Rc Farm And Resort",
+        "extension":  "jpg"
+    },
+    {
+        "file":  "images/oriental-mindoro-logo.png",
+        "category":  "images",
+        "title":  "Oriental Mindoro Logo",
+        "extension":  "png"
+    }
+]
