@@ -80,6 +80,11 @@ Route::middleware('auth')->group(function () {
 
     // Products
     Route::resource('products', ProductController::class)->except(['show']);
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/shop/cart', [ProductController::class, 'cart'])->name('products.cart');
+    Route::post('/products/{product}/cart', [ProductController::class, 'addToCart'])->name('products.cart.add');
+    Route::patch('/shop/cart/{product}', [ProductController::class, 'updateCart'])->name('products.cart.update');
+    Route::delete('/shop/cart/{product}', [ProductController::class, 'removeFromCart'])->name('products.cart.remove');
     Route::patch('/products/{product}/approve', [ProductController::class, 'approve'])->name('products.approve');
     Route::patch('/products/{product}/reject', [ProductController::class, 'reject'])->name('products.reject');
 
