@@ -16,43 +16,57 @@ class SampleDataSeeder extends Seeder
 {
     public function run()
     {
+        $defaultPassword = Hash::make('password');
+
         // Create admin user
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@discovermansalay.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'),
+                'password' => $defaultPassword,
                 'role' => 'admin',
+                'is_active' => true,
+                'is_approved' => true,
+                'approved_at' => now(),
             ]
         );
 
         // Create resort owner user
-        $resortOwner = User::firstOrCreate(
+        $resortOwner = User::updateOrCreate(
             ['email' => 'resort@discovermansalay.com'],
             [
                 'name' => 'Resort Owner',
-                'password' => Hash::make('password'),
+                'password' => $defaultPassword,
                 'role' => 'resort_owner',
+                'is_active' => true,
+                'is_approved' => true,
+                'approved_at' => now(),
             ]
         );
 
         // Create enterprise owner user (vendor)
-        $enterpriseOwner = User::firstOrCreate(
+        $enterpriseOwner = User::updateOrCreate(
             ['email' => 'vendor@discovermansalay.com'],
             [
                 'name' => 'Enterprise Owner',
-                'password' => Hash::make('password'),
+                'password' => $defaultPassword,
                 'role' => 'enterprise_owner',
+                'is_active' => true,
+                'is_approved' => true,
+                'approved_at' => now(),
             ]
         );
 
         // Create tourist user
-        $tourist = User::firstOrCreate(
+        $tourist = User::updateOrCreate(
             ['email' => 'tourist@discovermansalay.com'],
             [
                 'name' => 'Juan dela Cruz',
-                'password' => Hash::make('password'),
+                'password' => $defaultPassword,
                 'role' => 'tourist',
+                'is_active' => true,
+                'is_approved' => true,
+                'approved_at' => now(),
             ]
         );
 
