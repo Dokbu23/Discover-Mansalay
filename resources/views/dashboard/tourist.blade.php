@@ -246,8 +246,6 @@
     </div>
 </div>
 
-@include('dashboard.partials.image-gallery')
-
 @section('styles')
 <style>
 @media (max-width: 900px) {

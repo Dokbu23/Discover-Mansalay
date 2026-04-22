@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Discover Mansalay - Tourism Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -755,7 +756,9 @@
                 font-size: 1.75rem;
             }
         }
+
     </style>
+    @include('partials.chatbot-styles')
 </head>
 <body data-authenticated="{{ auth()->check() ? '1' : '0' }}">
     <!-- Splash Screen -->
@@ -770,10 +773,11 @@
         <div class="logo">Discover<span>Mansalay</span></div>
         <div class="nav-links">
             <a href="#home">Home</a>
-            <a href="#heritage" class="requires-auth">Heritage Sites</a>
-            <a href="#resorts" class="requires-auth">Resorts</a>
-            <a href="#events" class="requires-auth">Events</a>
-            <a href="#products" class="requires-auth">Pasalubong</a>
+            <a href="#heritage">Heritage Sites</a>
+            <a href="#resorts">Resorts</a>
+            <a href="#events">Events</a>
+            <a href="#products">Product</a>
+            <a href="#awati">Awati</a>
         </div>
         <div class="nav-buttons">
             @auth
@@ -1002,6 +1006,31 @@
         </div>
     </section>
 
+    <!-- Awati Section -->
+    <section class="destinations" id="awati" style="background: #fff7fb;">
+        <div class="destinations-container">
+            <div class="section-header">
+                <span class="section-tag">Awati</span>
+                <h2 class="section-title">About Awati</h2>
+            </div>
+            <div class="feature-card animate-on-scroll" style="max-width: 860px; margin: 0 auto; text-align: left;">
+                <h3 style="color: #be185d; margin-bottom: 0.75rem;">Build Your Awati Website Here</h3>
+                <p style="color: #7a4d63; font-size: 1rem; line-height: 1.75;">
+                    This section is ready for your Awati content. You can place your brand story, services, products,
+                    portfolio, or contact details here. Update this block with your final Awati details and it will be
+                    reachable directly from the navigation link above.
+                </p>
+                <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    @auth
+                    <a href="{{ route('awati.buyer.dashboard') }}" class="btn-primary btn-animated" style="text-decoration: none;">Open Awati Buyer Dashboard</a>
+                    @else
+                    <a href="{{ route('login') }}" class="btn-primary btn-animated" style="text-decoration: none;">Login to Open Buyer Dashboard</a>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta" id="contact">
         <div class="cta-container">
@@ -1047,6 +1076,8 @@
         <div class="footer-logo">Discover<span>Mansalay</span></div>
         <p>&copy; {{ date('Y') }} Municipal Tourism Office of Mansalay, Oriental Mindoro. All rights reserved.</p>
     </footer>
+
+    @include('partials.chatbot-widget')
 
     <script>
         // Hide splash screen after page loads
@@ -1163,7 +1194,9 @@
                 }
             });
         });
+
     </script>
+    @include('partials.chatbot-script')
 </body>
 </html>
 

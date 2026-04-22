@@ -689,9 +689,13 @@
         .form-label {
             color: var(--text-soft);
         }
-
-        @yield('styles')
     </style>
+    <?php
+    $pageStyles = trim($__env->yieldContent('styles'));
+    if ($pageStyles !== '') {
+        echo '<style>' . $pageStyles . '</style>';
+    }
+    ?>
 </head>
 <body>
     <!-- Sidebar -->

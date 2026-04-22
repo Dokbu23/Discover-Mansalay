@@ -220,8 +220,6 @@
     </div>
 </div>
 
-@include('dashboard.partials.image-gallery')
-
 @section('styles')
 <style>
 @media (max-width: 768px) {

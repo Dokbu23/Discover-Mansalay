@@ -275,7 +275,9 @@
                 padding: 1.5rem;
             }
         }
+
     </style>
+    @include('partials.chatbot-styles')
 </head>
 <body>
     <!-- Brand Side -->
@@ -388,6 +390,9 @@
             </div>
         </div>
     </div>
+
+    @include('partials.chatbot-widget')
+    @include('partials.chatbot-script')
 </body>
 </html>
 

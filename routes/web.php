@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\AwatiBuyerDashboardController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\PublicChatbotController;
 use App\Http\Controllers\ResortController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SupportRequestController;
@@ -45,6 +47,9 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
+// Public chatbot for login/help queries
+Route::post('/chatbot/ask', [PublicChatbotController::class, 'ask'])->name('chatbot.ask');
+
 /*
 |--------------------------------------------------------------------------
 | Dashboard Routes (Protected)
@@ -57,6 +62,9 @@ Route::middleware('auth')->group(function () {
 
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Awati Buyer Dashboard
+    Route::get('/awati/buyer-dashboard', [AwatiBuyerDashboardController::class, 'index'])->name('awati.buyer.dashboard');
 
     // Heritage Sites
     Route::get('/heritage', [HeritageSiteController::class, 'index'])->name('heritage.index');
