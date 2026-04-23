@@ -12,6 +12,47 @@
     </div>
 </div>
 
+@php
+    $vendorPaymentFee = config('payments.vendor_approval_fee', 0);
+    $gcashName = config('payments.gcash_name', '');
+    $gcashNumber = config('payments.gcash_number', '');
+@endphp
+
+@if(!Auth::user()->is_approved)
+<!-- Vendor Approval Fee -->
+<div class="card" style="margin-bottom: 2rem; border-left: 4px solid #0ea5e9;">
+    <div class="card-body">
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; justify-content: space-between;">
+            <div style="flex: 1; min-width: 260px;">
+                <h3 style="margin: 0 0 0.5rem 0;">Vendor Approval Fee</h3>
+                <p style="margin: 0 0 0.75rem 0; color: #6b7280;">Please pay the approval fee and upload your GCash receipt to proceed.</p>
+                <div style="display: grid; gap: 0.35rem; font-size: 0.9rem;">
+                    <div><strong>Fee:</strong> ₱{{ number_format($vendorPaymentFee, 2) }}</div>
+                    <div><strong>GCash Name:</strong> {{ $gcashName }}</div>
+                    <div><strong>GCash Number:</strong> {{ $gcashNumber }}</div>
+                </div>
+            </div>
+            <div style="min-width: 260px;">
+                @if(Auth::user()->hasVerifiedVendorPayment())
+                    <span style="padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: #dcfce7; color: #15803d;">Payment Verified</span>
+                    <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.85rem;">Wait for admin approval.</p>
+                @elseif(Auth::user()->hasSubmittedVendorPayment())
+                    <span style="padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: #dbeafe; color: #2563eb;">Receipt Submitted</span>
+                    <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.85rem;">Admin will verify your payment.</p>
+                @else
+                    <form action="{{ route('vendor.payment.submit') }}" method="POST" enctype="multipart/form-data" style="display: grid; gap: 0.5rem;">
+                        @csrf
+                        <input type="file" name="receipt" class="form-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <button type="submit" class="btn btn-primary" style="background: #0ea5e9;">Done Payment</button>
+                    </form>
+                    <p style="margin: 0.5rem 0 0 0; color: #9ca3af; font-size: 0.8rem;">Accepted: JPG, PNG, PDF (max 5MB)</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Stats Grid -->
 <div class="stats-grid" style="margin-bottom: 2rem;">
     <div class="stat-card">

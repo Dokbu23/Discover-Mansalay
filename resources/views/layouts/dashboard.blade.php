@@ -689,6 +689,58 @@
         .form-label {
             color: var(--text-soft);
         }
+
+        /* Vendor payment modal */
+        .vendor-payment-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(2px);
+        }
+
+        .vendor-payment-modal {
+            width: min(560px, 92vw);
+            background: #fff;
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 30px 80px rgba(17, 24, 39, 0.3);
+        }
+
+        .vendor-payment-modal h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+            color: var(--pink-700);
+        }
+
+        .vendor-payment-modal p {
+            color: var(--text-soft);
+            margin-bottom: 1rem;
+        }
+
+        .vendor-payment-details {
+            background: var(--pink-50);
+            border: 1px solid var(--line-soft);
+            border-radius: 12px;
+            padding: 1rem;
+            display: grid;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .vendor-payment-note {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        body.vendor-payment-locked {
+            overflow: hidden;
+        }
     </style>
     <?php
     $pageStyles = trim($__env->yieldContent('styles'));
@@ -698,6 +750,20 @@
     ?>
 </head>
 <body>
+    @php
+        $showVendorPaymentModal = Auth::check() && Auth::user()->isVendorRole() && !Auth::user()->is_approved;
+        $vendorPaymentFee = config('payments.vendor_approval_fee', 0);
+        $gcashName = config('payments.gcash_name', '');
+        $gcashNumber = config('payments.gcash_number', '');
+    @endphp
+
+    @if($showVendorPaymentModal)
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.body.classList.add('vendor-payment-locked');
+            });
+        </script>
+    @endif
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -1045,6 +1111,71 @@
             </div>
         </div>
     </div>
+
+    @if($showVendorPaymentModal)
+        <div class="vendor-payment-backdrop" role="dialog" aria-modal="true" aria-label="Vendor approval payment">
+            <div class="vendor-payment-modal">
+                <h2>Vendor Approval Payment Required</h2>
+                <p>Please pay the fee and upload your GCash receipt to continue.</p>
+                <div class="vendor-payment-details">
+                    <div><strong>Fee:</strong> Php {{ number_format($vendorPaymentFee, 2) }}</div>
+                    <div><strong>GCash Name:</strong> {{ $gcashName }}</div>
+                    <div><strong>GCash Number:</strong> {{ $gcashNumber }}</div>
+                </div>
+
+                @if(Auth::user()->hasVerifiedVendorPayment())
+                    <span class="status-badge status-confirmed">Payment Verified</span>
+                    <p class="vendor-payment-note">Please wait for admin approval to access the vendor dashboard.</p>
+                    <form method="POST" action="{{ route('logout') }}" style="margin-top: 0.75rem;">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Log Out</button>
+                    </form>
+                @elseif(Auth::user()->hasSubmittedVendorPayment())
+                    <span class="status-badge status-pending">Receipt Submitted</span>
+                    <p class="vendor-payment-note">Admin will verify your payment. You will gain access once approved.</p>
+
+                    <form action="{{ route('vendor.payment.submit') }}" method="POST" enctype="multipart/form-data" style="margin-top: 1rem; display: grid; gap: 0.5rem;">
+                        @csrf
+                        <input type="file" name="receipt" class="form-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <button type="submit" class="btn btn-primary">Re-upload Receipt</button>
+                        <span class="vendor-payment-note">Accepted: JPG, PNG, PDF (max 5MB)</span>
+                    </form>
+                    <form method="POST" action="{{ route('logout') }}" style="margin-top: 0.75rem;">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Log Out</button>
+                    </form>
+                @else
+                    <form action="{{ route('vendor.payment.submit') }}" method="POST" enctype="multipart/form-data" style="display: grid; gap: 0.5rem;">
+                        @csrf
+                        <input type="file" name="receipt" class="form-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <button type="submit" class="btn btn-primary">Upload Receipt</button>
+                        <span class="vendor-payment-note">Accepted: JPG, PNG, PDF (max 5MB)</span>
+                    </form>
+                    <form method="POST" action="{{ route('logout') }}" style="margin-top: 0.75rem;">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Log Out</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    @endif
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('payment_success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Upload Successfully',
+                        text: '{{ session('payment_success') }}',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#be185d'
+                    });
+                }
+            });
+        </script>
+    @endif
 
     <style>
         /* Support Bot Widget Styles */

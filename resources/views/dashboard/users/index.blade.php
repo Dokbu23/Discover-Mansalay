@@ -129,6 +129,7 @@
                             <th>Role</th>
                             <th>Status</th>
                             <th>Approval</th>
+                            <th>Payment</th>
                             <th>Joined</th>
                             <th>Actions</th>
                         </tr>
@@ -178,6 +179,20 @@
                                     <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; background: #fef3c7; color: #92400e;">Pending</span>
                                 @endif
                             </td>
+                            <td>
+                                @php
+                                    $isVendorRole = in_array($user->role, ['resort_owner', 'enterprise_owner'], true);
+                                @endphp
+                                @if(!$isVendorRole)
+                                    <span style="color: #9ca3af; font-size: 0.8rem;">-</span>
+                                @elseif($user->hasVerifiedVendorPayment())
+                                    <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; background: #dcfce7; color: #15803d;">Verified</span>
+                                @elseif($user->hasSubmittedVendorPayment())
+                                    <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; background: #dbeafe; color: #2563eb;">Submitted</span>
+                                @else
+                                    <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; background: #f3f4f6; color: #6b7280;">Not Submitted</span>
+                                @endif
+                            </td>
                             <td style="color: #6b7280; font-size: 0.85rem;">
                                 {{ $user->created_at->format('M d, Y') }}
                             </td>
@@ -185,11 +200,35 @@
                                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                     @if(!$user->is_approved)
                                         {{-- Show Approve/Reject for pending users --}}
-                                        <form action="{{ route('users.approve', $user) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
-                                        </form>
+                                        @if($isVendorRole)
+                                            @if($user->hasSubmittedVendorPayment())
+                                                <a href="{{ route('users.payment.receipt.view', $user) }}" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">View Payment</a>
+                                                <a href="{{ route('users.payment.receipt', $user) }}" class="btn btn-secondary btn-sm">Download</a>
+                                            @endif
+
+                                            @if($user->hasSubmittedVendorPayment() && !$user->hasVerifiedVendorPayment())
+                                                <form action="{{ route('users.payment.verify', $user) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-primary btn-sm" style="background: #0ea5e9;">Verify Payment</button>
+                                                </form>
+                                            @endif
+
+                                            @if($user->hasVerifiedVendorPayment())
+                                                <form action="{{ route('users.approve', $user) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
+                                                </form>
+                                            @endif
+                                        @else
+                                            <form action="{{ route('users.approve', $user) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
+                                            </form>
+                                        @endif
+
                                         <form action="{{ route('users.reject', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Reject this registration? The user will be deleted.');">
                                             @csrf
                                             @method('DELETE')

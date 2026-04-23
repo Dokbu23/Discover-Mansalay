@@ -16,11 +16,11 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Resort::class => ResortPolicy::class,
     ];
-
     /**
      * Register any authentication / authorization services.
      *
      * @return void
+     * 
      */
     public function boot()
     {

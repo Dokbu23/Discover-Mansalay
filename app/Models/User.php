@@ -25,6 +25,9 @@ class User extends Authenticatable
         'is_active',
         'is_approved',
         'approved_at',
+        'vendor_payment_receipt_path',
+        'vendor_payment_submitted_at',
+        'vendor_payment_verified_at',
     ];
 
     /**
@@ -47,6 +50,8 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'is_approved' => 'boolean',
         'approved_at' => 'datetime',
+        'vendor_payment_submitted_at' => 'datetime',
+        'vendor_payment_verified_at' => 'datetime',
     ];
 
     /**
@@ -71,6 +76,30 @@ class User extends Authenticatable
     public function isEnterpriseOwner()
     {
         return $this->role === 'enterprise_owner';
+    }
+
+    /**
+     * Check if user is a vendor role
+     */
+    public function isVendorRole()
+    {
+        return in_array($this->role, ['resort_owner', 'enterprise_owner'], true);
+    }
+
+    /**
+     * Check if vendor payment was submitted
+     */
+    public function hasSubmittedVendorPayment()
+    {
+        return $this->vendor_payment_receipt_path !== null;
+    }
+
+    /**
+     * Check if vendor payment was verified
+     */
+    public function hasVerifiedVendorPayment()
+    {
+        return $this->vendor_payment_verified_at !== null;
     }
 
     /**

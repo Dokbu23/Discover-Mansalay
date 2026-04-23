@@ -33,9 +33,11 @@ class LoginController extends Controller
         if ($user) {
             // Check if user is approved
             if (!$user->is_approved) {
-                return back()->withErrors([
-                    'email' => 'Your account is pending approval. Please wait for admin to approve your registration.',
-                ])->onlyInput('email');
+                if (!$user->isVendorRole()) {
+                    return back()->withErrors([
+                        'email' => 'Your account is pending approval. Please wait for admin to approve your registration.',
+                    ])->onlyInput('email');
+                }
             }
             
             // Check if user is active

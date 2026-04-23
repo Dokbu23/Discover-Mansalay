@@ -63,8 +63,14 @@ Route::middleware('auth')->group(function () {
     // Main Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Awati Buyer Dashboard
-    Route::get('/awati/buyer-dashboard', [AwatiBuyerDashboardController::class, 'index'])->name('awati.buyer.dashboard');
+    // Vendor Payment Submission (Vendor Roles)
+    Route::post('/vendor-payment/submit', [UserController::class, 'submitVendorPayment'])->name('vendor.payment.submit');
+
+
+    Route::middleware('approved')->group(function () {
+
+        // Awati Buyer Dashboard
+        Route::get('/awati/buyer-dashboard', [AwatiBuyerDashboardController::class, 'index'])->name('awati.buyer.dashboard');
 
     // Heritage Sites
     Route::get('/heritage', [HeritageSiteController::class, 'index'])->name('heritage.index');
@@ -108,6 +114,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('/users/{user}/reject', [UserController::class, 'reject'])->name('users.reject');
+    Route::patch('/users/{user}/payment-verify', [UserController::class, 'verifyVendorPayment'])->name('users.payment.verify');
+    Route::get('/users/{user}/payment-receipt', [UserController::class, 'downloadVendorPaymentReceipt'])->name('users.payment.receipt');
+    Route::get('/users/{user}/payment-receipt/view', [UserController::class, 'viewVendorPaymentReceipt'])->name('users.payment.receipt.view');
 
     // Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -134,5 +143,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/support', [SupportRequestController::class, 'store'])->name('support.store');
     Route::get('/support/{supportRequest}', [SupportRequestController::class, 'show'])->name('support.show');
     Route::put('/support/{supportRequest}', [SupportRequestController::class, 'update'])->name('support.update');
-    Route::get('/support/open-count', [SupportRequestController::class, 'getOpenCount'])->name('support.open-count');
+        Route::get('/support/open-count', [SupportRequestController::class, 'getOpenCount'])->name('support.open-count');
+    });
 });

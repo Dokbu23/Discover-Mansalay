@@ -66,6 +66,11 @@ class DashboardController extends Controller
     {
         $galleryImages = $this->getGalleryImages();
 
+        $pendingVendorPayments = User::whereIn('role', ['resort_owner', 'enterprise_owner'])
+            ->whereNotNull('vendor_payment_receipt_path')
+            ->whereNull('vendor_payment_verified_at')
+            ->count();
+
         $stats = [
             'heritage_sites' => HeritageSite::where('is_active', true)->count(),
             'resorts' => Resort::where('is_active', true)->count(),
@@ -84,7 +89,7 @@ class DashboardController extends Controller
 
         $upcomingEvents = Event::upcoming()->take(5)->get();
 
-        return view('dashboard.admin', compact('stats', 'recentBookings', 'upcomingEvents', 'galleryImages'));
+        return view('dashboard.admin', compact('stats', 'recentBookings', 'upcomingEvents', 'galleryImages', 'pendingVendorPayments'));
     }
 
     /**

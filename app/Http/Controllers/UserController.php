@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -172,11 +173,105 @@ class UserController extends Controller
             abort(403);
         }
 
+        if ($user->isVendorRole() && !$user->hasVerifiedVendorPayment()) {
+            return redirect()->back()->with('error', "Vendor payment must be verified before approval.");
+        }
+
         $user->is_approved = true;
         $user->approved_at = now();
         $user->save();
 
         return redirect()->back()->with('success', "User '{$user->name}' has been approved!");
+    }
+
+    public function submitVendorPayment(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->isVendorRole()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
+
+        if ($user->vendor_payment_receipt_path && Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
+            Storage::disk('local')->delete($user->vendor_payment_receipt_path);
+        }
+
+        $path = $validated['receipt']->store('vendor-payments', 'local');
+
+        $user->vendor_payment_receipt_path = $path;
+        $user->vendor_payment_submitted_at = now();
+        $user->vendor_payment_verified_at = null;
+        $user->save();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Payment receipt submitted. Please wait for admin verification.')
+            ->with('payment_success', 'Upload successfully');
+    }
+
+    public function verifyVendorPayment(User $user)
+    {
+        $authUser = Auth::user();
+
+        if (!$authUser->isAdmin()) {
+            abort(403);
+        }
+
+        if (!$user->isVendorRole()) {
+            return redirect()->back()->with('error', 'Selected user is not a vendor role.');
+        }
+
+        if (!$user->hasSubmittedVendorPayment()) {
+            return redirect()->back()->with('error', 'No payment receipt found for this user.');
+        }
+
+        $user->vendor_payment_verified_at = now();
+        $user->save();
+
+        return redirect()->back()->with('success', "Payment verified for '{$user->name}'. You can now approve the account.");
+    }
+
+    public function downloadVendorPaymentReceipt(User $user)
+    {
+        $authUser = Auth::user();
+
+        if (!$authUser->isAdmin()) {
+            abort(403);
+        }
+
+        if (!$user->hasSubmittedVendorPayment()) {
+            abort(404);
+        }
+
+        if (!Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
+            abort(404);
+        }
+
+        $filePath = Storage::disk('local')->path($user->vendor_payment_receipt_path);
+
+        return response()->download($filePath);
+    }
+
+    public function viewVendorPaymentReceipt(User $user)
+    {
+        $authUser = Auth::user();
+
+        if (!$authUser->isAdmin()) {
+            abort(403);
+        }
+
+        if (!$user->hasSubmittedVendorPayment()) {
+            abort(404);
+        }
+
+        if (!Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->response($user->vendor_payment_receipt_path);
     }
 
     public function reject(User $user)

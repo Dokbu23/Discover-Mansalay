@@ -275,8 +275,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920') center/cover;
-            opacity: 0.3;
+            background: url('{{ asset("images/mansalay-cover.png") }}') center/cover;
+            opacity: 1;
         }
 
         .hero-content {
