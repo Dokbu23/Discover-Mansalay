@@ -83,7 +83,10 @@
         <div style="display: flex; gap: 0.5rem;">
             <a href="{{ route('users.edit', $user) }}" class="btn btn-primary">Edit User</a>
             @if($user->id !== Auth::id())
-            <form method="POST" action="{{ route('users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to {{ $user->is_active ? 'deactivate' : 'activate' }} this user?');">
+            @php
+                $toggleMessage = 'Are you sure you want to ' . ($user->is_active ? 'deactivate' : 'activate') . ' this user?';
+            @endphp
+            <form method="POST" action="{{ route('users.destroy', $user) }}" data-confirm="{{ $toggleMessage }}" onsubmit="return confirm(this.dataset.confirm);">
                 @csrf
                 @method('DELETE')
                 @if($user->is_active)
@@ -207,7 +210,7 @@
                 </div>
             </div>
             <div style="margin-top: 1rem;">
-                <a href="{{ route('vendors.show', $user->vendor) }}" class="btn btn-primary">View Vendor Details</a>
+                <a href="{{ route('vendors.edit', $user->vendor) }}" class="btn btn-primary">View Vendor Details</a>
             </div>
         </div>
         @endif

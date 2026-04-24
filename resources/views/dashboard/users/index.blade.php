@@ -16,14 +16,14 @@
 <!-- Filters -->
 <div class="card" style="margin-bottom: 1.5rem;">
     <div class="card-body">
-        <form method="GET" action="{{ route('users.index') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+        <form id="user-filter-form" method="GET" action="{{ route('users.index') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
             <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
                 <label class="form-label">Search</label>
-                <input type="text" name="search" class="form-input" placeholder="Search by name or email..." value="{{ request('search') }}">
+                <input id="user-search-input" type="text" name="search" class="form-input" placeholder="Search by name or email..." value="{{ request('search') }}">
             </div>
             <div class="form-group" style="margin: 0; min-width: 150px;">
                 <label class="form-label">Role</label>
-                <select name="role" class="form-input">
+                <select name="role" class="form-input" onchange="this.form.submit()">
                     <option value="">All Roles</option>
                     <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                     <option value="resort_owner" {{ request('role') == 'resort_owner' ? 'selected' : '' }}>Resort Owner</option>
@@ -33,7 +33,7 @@
             </div>
             <div class="form-group" style="margin: 0; min-width: 120px;">
                 <label class="form-label">Status</label>
-                <select name="status" class="form-input">
+                <select name="status" class="form-input" onchange="this.form.submit()">
                     <option value="">All Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -41,7 +41,7 @@
             </div>
             <div class="form-group" style="margin: 0; min-width: 120px;">
                 <label class="form-label">Approval</label>
-                <select name="approval" class="form-input">
+                <select name="approval" class="form-input" onchange="this.form.submit()">
                     <option value="">All</option>
                     <option value="pending" {{ request('approval') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="approved" {{ request('approval') == 'approved' ? 'selected' : '' }}>Approved</option>
@@ -341,6 +341,28 @@
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    (function () {
+        var searchInput = document.getElementById('user-search-input');
+        var filterForm = document.getElementById('user-filter-form');
+
+        if (!searchInput || !filterForm) {
+            return;
+        }
+
+        var debounceTimer;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                filterForm.submit();
+            }, 450);
+        });
+    })();
+</script>
 @endsection
 
 
