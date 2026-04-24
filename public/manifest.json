@@ -1,0 +1,21 @@
+{
+    "name": "Discover Mansalay",
+    "short_name": "Mansalay",
+    "description": "Discover Mansalay Tourism Portal",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fff5fb",
+    "theme_color": "#be185d",
+    "icons": [
+        {
+            "src": "/images/discover-mansalay-logo.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/images/discover-mansalay-logo.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg"
+        }
+    ]
+}

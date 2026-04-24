@@ -11,9 +11,20 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    private function getAuthUser(): User
     {
         $user = Auth::user();
+
+        if (!$user instanceof User) {
+            abort(403);
+        }
+
+        return $user;
+    }
+
+    public function index(Request $request)
+    {
+        $user = $this->getAuthUser();
         
         if (!$user->isAdmin()) {
             abort(403);
@@ -60,7 +71,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
+        $user = $this->getAuthUser();
         
         if (!$user->isAdmin()) {
             abort(403);
@@ -71,7 +82,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->getAuthUser();
         
         if (!$user->isAdmin()) {
             abort(403);
@@ -96,7 +107,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -109,7 +120,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -120,7 +131,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -146,7 +157,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -167,7 +178,7 @@ class UserController extends Controller
 
     public function approve(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -186,7 +197,7 @@ class UserController extends Controller
 
     public function submitVendorPayment(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->getAuthUser();
 
         if (!$user->isVendorRole()) {
             abort(403);
@@ -196,8 +207,11 @@ class UserController extends Controller
             'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        if ($user->vendor_payment_receipt_path && Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
-            Storage::disk('local')->delete($user->vendor_payment_receipt_path);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('local');
+
+        if ($user->vendor_payment_receipt_path && $disk->exists($user->vendor_payment_receipt_path)) {
+            $disk->delete($user->vendor_payment_receipt_path);
         }
 
         $path = $validated['receipt']->store('vendor-payments', 'local');
@@ -214,7 +228,7 @@ class UserController extends Controller
 
     public function verifyVendorPayment(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
 
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -236,7 +250,7 @@ class UserController extends Controller
 
     public function downloadVendorPaymentReceipt(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
 
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -246,18 +260,21 @@ class UserController extends Controller
             abort(404);
         }
 
-        if (!Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('local');
+
+        if (!$disk->exists($user->vendor_payment_receipt_path)) {
             abort(404);
         }
 
-        $filePath = Storage::disk('local')->path($user->vendor_payment_receipt_path);
+        $filePath = $disk->path($user->vendor_payment_receipt_path);
 
         return response()->download($filePath);
     }
 
     public function viewVendorPaymentReceipt(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
 
         if (!$authUser->isAdmin()) {
             abort(403);
@@ -267,16 +284,19 @@ class UserController extends Controller
             abort(404);
         }
 
-        if (!Storage::disk('local')->exists($user->vendor_payment_receipt_path)) {
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('local');
+
+        if (!$disk->exists($user->vendor_payment_receipt_path)) {
             abort(404);
         }
 
-        return Storage::disk('local')->response($user->vendor_payment_receipt_path);
+        return $disk->response($user->vendor_payment_receipt_path);
     }
 
     public function reject(User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->getAuthUser();
         
         if (!$authUser->isAdmin()) {
             abort(403);

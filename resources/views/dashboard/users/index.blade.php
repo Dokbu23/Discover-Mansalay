@@ -153,15 +153,10 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 @php
-                                    $roleColors = [
-                                        'admin' => 'background: #fee2e2; color: #dc2626;',
-                                        'resort_owner' => 'background: #dbeafe; color: #2563eb;',
-                                        'enterprise_owner' => 'background: #f3e8ff; color: #7c3aed;',
-                                        'tourist' => 'background: #ffe3f1; color: #db2777;',
-                                    ];
-                                    $roleStyle = $roleColors[$user->role] ?? 'background: #f3f4f6; color: #6b7280;';
+                                    $roleKey = str_replace('_', '-', $user->role ?? 'tourist');
+                                    $roleClass = 'role-badge role-' . $roleKey;
                                 @endphp
-                                <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; {{ $roleStyle }}">
+                                <span class="{{ $roleClass }}">
                                     {{ ucfirst(str_replace('_', ' ', $user->role ?? 'tourist')) }}
                                 </span>
                             </td>
@@ -197,60 +192,64 @@
                                 {{ $user->created_at->format('M d, Y') }}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                    @if(!$user->is_approved)
-                                        {{-- Show Approve/Reject for pending users --}}
-                                        @if($isVendorRole)
-                                            @if($user->hasSubmittedVendorPayment())
-                                                <a href="{{ route('users.payment.receipt.view', $user) }}" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">View Payment</a>
-                                                <a href="{{ route('users.payment.receipt', $user) }}" class="btn btn-secondary btn-sm">Download</a>
-                                            @endif
+                                <details class="action-dropdown">
+                                    <summary>Actions</summary>
+                                    <div class="action-menu">
+                                        @if(!$user->is_approved)
+                                            @if($isVendorRole)
+                                                @if($user->hasSubmittedVendorPayment())
+                                                    <a href="{{ route('users.payment.receipt.view', $user) }}" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">View Payment</a>
+                                                    <a href="{{ route('users.payment.receipt', $user) }}" class="btn btn-secondary btn-sm">Download</a>
+                                                @endif
 
-                                            @if($user->hasSubmittedVendorPayment() && !$user->hasVerifiedVendorPayment())
-                                                <form action="{{ route('users.payment.verify', $user) }}" method="POST" style="display: inline;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-primary btn-sm" style="background: #0ea5e9;">Verify Payment</button>
-                                                </form>
-                                            @endif
+                                                @if($user->hasSubmittedVendorPayment() && !$user->hasVerifiedVendorPayment())
+                                                    <form action="{{ route('users.payment.verify', $user) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-primary btn-sm" style="background: #0ea5e9;">Verify Payment</button>
+                                                    </form>
+                                                @endif
 
-                                            @if($user->hasVerifiedVendorPayment())
-                                                <form action="{{ route('users.approve', $user) }}" method="POST" style="display: inline;">
+                                                @if($user->hasVerifiedVendorPayment())
+                                                    <form action="{{ route('users.approve', $user) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
+                                                    </form>
+                                                @endif
+                                            @else
+                                                <form action="{{ route('users.approve', $user) }}" method="POST">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
                                                 </form>
                                             @endif
-                                        @else
-                                            <form action="{{ route('users.approve', $user) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-primary btn-sm" style="background: #db2777;">Approve</button>
-                                            </form>
-                                        @endif
 
-                                        <form action="{{ route('users.reject', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Reject this registration? The user will be deleted.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                                        </form>
-                                    @else
-                                        {{-- Show View/Edit/Activate/Deactivate for approved users --}}
-                                        <a href="{{ route('users.show', $user) }}" class="btn btn-secondary btn-sm">View</a>
-                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-secondary btn-sm">Edit</a>
-                                        @if($user->id !== Auth::id())
-                                        <form action="{{ route('users.destroy', $user) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to {{ $user->is_active ? 'deactivate' : 'activate' }} this user?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            @if($user->is_active)
-                                                <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
-                                            @else
-                                                <button type="submit" class="btn btn-primary btn-sm">Activate</button>
+                                            <form action="{{ route('users.reject', $user) }}" method="POST" onsubmit="return confirm('Reject this registration? The user will be deleted.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('users.show', $user) }}" class="btn btn-secondary btn-sm">View</a>
+                                            <a href="{{ route('users.edit', $user) }}" class="btn btn-secondary btn-sm">Edit</a>
+                                            @if($user->id !== Auth::id())
+                                                @php
+                                                    $toggleMessage = 'Are you sure you want to ' . ($user->is_active ? 'deactivate' : 'activate') . ' this user?';
+                                                @endphp
+                                                <form action="{{ route('users.destroy', $user) }}" method="POST" data-confirm="{{ $toggleMessage }}" onsubmit="return confirm(this.dataset.confirm);">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    @if($user->is_active)
+                                                        <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
+                                                    @else
+                                                        <button type="submit" class="btn btn-primary btn-sm">Activate</button>
+                                                    @endif
+                                                </form>
                                             @endif
-                                        </form>
                                         @endif
-                                    @endif
-                                </div>
+                                    </div>
+                                </details>
                             </td>
                         </tr>
                         @endforeach
@@ -273,6 +272,75 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('styles')
+<style>
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    .role-admin { background: #fee2e2; color: #dc2626; }
+    .role-resort-owner { background: #dbeafe; color: #2563eb; }
+    .role-enterprise-owner { background: #f3e8ff; color: #7c3aed; }
+    .role-tourist { background: #ffe3f1; color: #db2777; }
+    .role-default { background: #f3f4f6; color: #6b7280; }
+
+    .action-dropdown {
+        position: relative;
+    }
+
+    .action-dropdown > summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        background: #f0f4f3;
+        color: #be185d;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .action-dropdown > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .action-menu {
+        position: absolute;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem;
+        display: grid;
+        gap: 0.5rem;
+        min-width: 180px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        z-index: 20;
+    }
+
+    .action-dropdown[open] .action-menu {
+        animation: fadeIn 0.15s ease;
+    }
+
+    .action-menu .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 @endsection
 
 

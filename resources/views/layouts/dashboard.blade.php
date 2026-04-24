@@ -4,7 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#be185d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>@yield('title', 'Dashboard') | Discover Mansalay</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/discover-mansalay-logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -508,6 +513,22 @@
             padding: 0.5rem;
         }
 
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 0.75rem 1rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+
+            .content-area {
+                padding: 1.25rem;
+            }
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -749,12 +770,13 @@
     }
     ?>
 </head>
-<body>
+<body data-payment-success="{{ session('payment_success') }}">
     @php
-        $showVendorPaymentModal = Auth::check() && Auth::user()->isVendorRole() && !Auth::user()->is_approved;
+        $showVendorPaymentModal = Auth::check() && Auth::user()->isVendorRole() && !Auth::user()->hasVerifiedVendorPayment();
         $vendorPaymentFee = config('payments.vendor_approval_fee', 0);
         $gcashName = config('payments.gcash_name', '');
         $gcashNumber = config('payments.gcash_number', '');
+        $vendorRoleLabel = Auth::check() && Auth::user()->isResortOwner() ? 'Resort Owner' : 'Vendor';
     @endphp
 
     @if($showVendorPaymentModal)
@@ -1115,7 +1137,7 @@
     @if($showVendorPaymentModal)
         <div class="vendor-payment-backdrop" role="dialog" aria-modal="true" aria-label="Vendor approval payment">
             <div class="vendor-payment-modal">
-                <h2>Vendor Approval Payment Required</h2>
+                <h2>{{ $vendorRoleLabel }} Approval Payment Required</h2>
                 <p>Please pay the fee and upload your GCash receipt to continue.</p>
                 <div class="vendor-payment-details">
                     <div><strong>Fee:</strong> Php {{ number_format($vendorPaymentFee, 2) }}</div>
@@ -1161,21 +1183,28 @@
     @endif
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @if(session('payment_success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Upload Successfully',
-                        text: '{{ session('payment_success') }}',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#be185d'
-                    });
-                }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var paymentSuccess = document.body.dataset.paymentSuccess;
+
+            if (paymentSuccess && typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Upload Successfully',
+                    text: paymentSuccess,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#be185d'
+                });
+            }
+        });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/service-worker.js');
             });
-        </script>
-    @endif
+        }
+    </script>
 
     <style>
         /* Support Bot Widget Styles */

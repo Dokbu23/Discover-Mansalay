@@ -18,13 +18,13 @@
     $gcashNumber = config('payments.gcash_number', '');
 @endphp
 
-@if(!Auth::user()->is_approved)
+@if(!Auth::user()->hasVerifiedVendorPayment())
 <!-- Vendor Approval Fee -->
 <div class="card" style="margin-bottom: 2rem; border-left: 4px solid #0ea5e9;">
     <div class="card-body">
         <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; justify-content: space-between;">
             <div style="flex: 1; min-width: 260px;">
-                <h3 style="margin: 0 0 0.5rem 0;">Vendor Approval Fee</h3>
+                <h3 style="margin: 0 0 0.5rem 0;">Resort Owner Approval Fee</h3>
                 <p style="margin: 0 0 0.75rem 0; color: #6b7280;">Please pay the approval fee and upload your GCash receipt to proceed.</p>
                 <div style="display: grid; gap: 0.35rem; font-size: 0.9rem;">
                     <div><strong>Fee:</strong> ₱{{ number_format($vendorPaymentFee, 2) }}</div>
