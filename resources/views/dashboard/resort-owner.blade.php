@@ -18,7 +18,7 @@
     $gcashNumber = config('payments.gcash_number', '');
 @endphp
 
-@if(!Auth::user()->hasVerifiedVendorPayment())
+@if(!Auth::user()->is_approved && !Auth::user()->hasVerifiedVendorPayment())
 <!-- Vendor Approval Fee -->
 <div class="card" style="margin-bottom: 2rem; border-left: 4px solid #0ea5e9;">
     <div class="card-body">

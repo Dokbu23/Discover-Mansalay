@@ -13,9 +13,18 @@
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             display: flex;
-            background: linear-gradient(135deg, #be185d 0%, #db2777 50%, #ec4899 100%);
+            background: url('/images/mansalay-cover-alt.png') center/cover no-repeat fixed;
             position: relative;
             overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: none;
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Left side - Image/Branding */
@@ -28,14 +37,8 @@
             padding: 3rem;
             color: white;
             position: relative;
-            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200') center/cover;
-        }
-
-        .brand-side::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(190, 24, 93, 0.86) 0%, rgba(236, 72, 153, 0.72) 100%);
+            background: linear-gradient(135deg, rgba(190, 24, 93, 0.7) 0%, rgba(236, 72, 153, 0.65) 100%);
+            z-index: 1;
         }
 
         .brand-content {
@@ -49,6 +52,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .brand-logo span {
@@ -59,6 +63,7 @@
             font-size: 1.1rem;
             opacity: 0.9;
             line-height: 1.6;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .brand-features {
@@ -72,6 +77,7 @@
             gap: 1rem;
             margin-bottom: 1.25rem;
             font-size: 0.95rem;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
         .brand-feature-icon {
@@ -97,7 +103,9 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            background: #fff7fb;
+            background: white;
+            position: relative;
+            z-index: 1;
         }
 
         .register-card {
@@ -107,6 +115,7 @@
             border-radius: 20px;
             padding: 2.5rem;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 2px solid #db2777;
         }
 
         .register-header {

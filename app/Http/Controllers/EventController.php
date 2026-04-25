@@ -4,14 +4,45 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
+    private function getGalleryImages()
+    {
+        $galleryImages = [];
+        $imageDirectory = public_path('images');
+
+        if (File::exists($imageDirectory)) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+
+            foreach (File::allFiles($imageDirectory) as $imageFile) {
+                if (stripos($imageFile->getFilename(), 'logo') !== false) {
+                    continue;
+                }
+
+                if (in_array(strtolower($imageFile->getExtension()), $allowedExtensions, true)) {
+                    $galleryImages[] = 'images/' . str_replace('\\', '/', $imageFile->getRelativePathname());
+                }
+            }
+
+            sort($galleryImages);
+        }
+
+        return $galleryImages;
+    }
+
     public function index()
     {
         $events = Event::latest()->paginate(10);
         return view('dashboard.events.index', compact('events'));
+    }
+
+    public function show(Event $event)
+    {
+        $galleryImages = $this->getGalleryImages();
+        return view('dashboard.events.show', compact('event', 'galleryImages'));
     }
 
     public function create()

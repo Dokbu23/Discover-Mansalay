@@ -242,28 +242,32 @@
     background: #fff;
     border: 1px solid #f4c5dc;
     border-radius: 10px;
-    padding: 0.35rem;
+    padding: 0.75rem 1.5rem;
     display: flex;
-    gap: 0.32rem;
+    gap: 1rem;
     flex-wrap: wrap;
-    margin-bottom: 0.7rem;
+    margin-bottom: 1rem;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .order-status-tab {
     text-decoration: none;
     color: #9d174d;
-    font-size: 0.76rem;
-    font-weight: 500;
-    padding: 0.32rem 0.58rem;
-    border-radius: 999px;
-    border: 1px solid #ffd6ea;
-    background: #fff1f7;
+    font-size: 0.78rem;
+    font-weight: 20;
+    padding: 0.5rem 1.2rem;
+    border-radius: 10px;
+    border: none;
+    background: #fce4f1;
+    white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
 .order-status-tab.active {
     background: #db2777;
     color: #fff;
-    border-color: #db2777;
+    border: none;
 }
 
 .orders-card-list {
@@ -279,7 +283,7 @@
 }
 
 .order-card-head {
-    padding: 0.55rem 0.75rem;
+    padding: 0.4rem 0.75rem;
     border-bottom: 1px solid #f8e6ef;
     display: flex;
     justify-content: space-between;
@@ -299,10 +303,10 @@
 }
 
 .order-card-body {
-    padding: 0.7rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     display: grid;
     grid-template-columns: 64px 1fr auto;
-    gap: 0.7rem;
+    gap: 0.6rem;
     align-items: center;
 }
 

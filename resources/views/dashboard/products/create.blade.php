@@ -15,15 +15,28 @@
                     <input type="text" name="name" class="form-input" value="{{ old('name') }}" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Vendor *</label>
-                    <select name="vendor_id" class="form-input form-select" required>
-                        <option value="">Select Vendor</option>
-                        @foreach($vendors as $vendor)
-                        <option value="{{ $vendor->id }}" {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                @if(Auth::user()->isAdmin())
+                    <div class="form-group">
+                        <label class="form-label">Vendor *</label>
+                        <select name="vendor_id" class="form-input form-select" required>
+                            <option value="">Select Vendor</option>
+                            @foreach($vendors as $vendor)
+                            <option value="{{ $vendor->id }}" {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @else
+                    <div class="form-group">
+                        <label class="form-label">Vendor</label>
+                        <input
+                            type="text"
+                            name="vendor_name"
+                            class="form-input"
+                            value="{{ old('vendor_name', $currentVendor->name ?? 'My Vendor') }}"
+                            required
+                        >
+                    </div>
+                @endif
             </div>
 
             <div class="form-group">

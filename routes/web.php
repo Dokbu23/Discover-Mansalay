@@ -32,6 +32,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/attractions', [HomeController::class, 'attractions'])->name('attractions');
+Route::get('/heritage-sites', [HomeController::class, 'heritage'])->name('heritage.public');
+Route::get('/resorts', [HomeController::class, 'resorts'])->name('resorts.public');
+Route::get('/events', [HomeController::class, 'events'])->name('events.public');
+Route::get('/products', [HomeController::class, 'products'])->name('products.public');
 
 /*
 |--------------------------------------------------------------------------
@@ -76,24 +81,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/heritage', [HeritageSiteController::class, 'index'])->name('heritage.index');
     Route::get('/heritage/create', [HeritageSiteController::class, 'create'])->name('heritage.create');
     Route::post('/heritage', [HeritageSiteController::class, 'store'])->name('heritage.store');
+    Route::get('/heritage/{heritage}', [HeritageSiteController::class, 'show'])->name('heritage.show');
     Route::get('/heritage/{heritage}/edit', [HeritageSiteController::class, 'edit'])->name('heritage.edit');
     Route::put('/heritage/{heritage}', [HeritageSiteController::class, 'update'])->name('heritage.update');
     Route::delete('/heritage/{heritage}', [HeritageSiteController::class, 'destroy'])->name('heritage.destroy');
 
     // Resorts
-    Route::resource('resorts', ResortController::class)->except(['show']);
+    Route::get('/dashboard/resorts', [ResortController::class, 'index'])->name('resorts.index');
+    Route::get('/resorts/{resort}', [ResortController::class, 'show'])->name('resorts.show');
+    Route::resource('resorts', ResortController::class)->except(['show', 'index']);
 
     // Rooms
     Route::resource('rooms', RoomController::class)->except(['show']);
 
     // Events
-    Route::resource('events', EventController::class)->except(['show']);
+    Route::get('/dashboard/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+    Route::resource('events', EventController::class)->except(['show', 'index']);
 
     // Vendors
+    Route::get('/vendor/settings', [VendorController::class, 'settings'])->name('vendors.settings');
+    Route::post('/vendor/settings', [VendorController::class, 'saveSettings'])->name('vendors.settings.save');
     Route::resource('vendors', VendorController::class)->except(['show']);
 
     // Products
-    Route::resource('products', ProductController::class)->except(['show']);
+    Route::get('/dashboard/products', [ProductController::class, 'index'])->name('products.index');
+    Route::resource('products', ProductController::class)->except(['show', 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
     Route::get('/shop/cart', [ProductController::class, 'cart'])->name('products.cart');
     Route::post('/products/{product}/cart', [ProductController::class, 'addToCart'])->name('products.cart.add');

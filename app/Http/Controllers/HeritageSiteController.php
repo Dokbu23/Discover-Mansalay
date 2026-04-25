@@ -4,10 +4,35 @@ namespace App\Http\Controllers;
 
 use App\Models\HeritageSite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class HeritageSiteController extends Controller
 {
+    private function getGalleryImages()
+    {
+        $galleryImages = [];
+        $imageDirectory = public_path('images');
+
+        if (File::exists($imageDirectory)) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+
+            foreach (File::allFiles($imageDirectory) as $imageFile) {
+                if (stripos($imageFile->getFilename(), 'logo') !== false) {
+                    continue;
+                }
+
+                if (in_array(strtolower($imageFile->getExtension()), $allowedExtensions, true)) {
+                    $galleryImages[] = 'images/' . str_replace('\\', '/', $imageFile->getRelativePathname());
+                }
+            }
+
+            sort($galleryImages);
+        }
+
+        return $galleryImages;
+    }
+
     private function ensureCanManageHeritageSites()
     {
         /** @var \App\Models\User|null $user */
@@ -22,6 +47,12 @@ class HeritageSiteController extends Controller
     {
         $sites = HeritageSite::latest()->paginate(10);
         return view('dashboard.heritage.index', compact('sites'));
+    }
+
+    public function show(HeritageSite $heritage)
+    {
+        $galleryImages = $this->getGalleryImages();
+        return view('dashboard.heritage.show', compact('heritage', 'galleryImages'));
     }
 
     public function create()

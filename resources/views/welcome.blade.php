@@ -773,10 +773,10 @@
         <div class="logo">Discover<span>Mansalay</span></div>
         <div class="nav-links">
             <a href="#home">Home</a>
-            <a href="#heritage">Heritage Sites</a>
-            <a href="#resorts">Resorts</a>
-            <a href="#events">Events</a>
-            <a href="#products">Product</a>
+            <a href="{{ route('heritage.public') }}">Heritage Sites</a>
+            <a href="{{ route('resorts.public') }}">Resorts</a>
+            <a href="{{ route('events.public') }}">Events</a>
+            <a href="{{ route('products.public') }}">Product</a>
             <a href="#awati">Awati</a>
         </div>
         <div class="nav-buttons">
@@ -798,11 +798,11 @@
                 and the Ammonite Capital of the Philippines. Your adventure starts here.
             </p>
             <div class="hero-buttons">
-                <a href="#heritage" class="btn-primary btn-animated btn-pulse">
+                <a href="{{ route('heritage.public') }}" class="btn-primary btn-animated btn-pulse">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
-                    Explore Now
+                    Explore Heritage
                 </a>
                 @guest
                 <a href="{{ route('login') }}" class="btn-secondary btn-animated">Log In</a>
@@ -867,7 +867,7 @@
                         $siteTitle = ucwords(str_replace(['-', '_'], ' ', pathinfo($siteImagePath, PATHINFO_FILENAME)));
                     }
                 @endphp
-                <div class="destination-card animate-on-scroll requires-auth" role="button" tabindex="0">
+                <div class="destination-card animate-on-scroll requires-auth" role="button" tabindex="0" data-href="{{ route('heritage.show', $site->id) }}">
                     <img src="{{ $siteImagePath ? asset($siteImagePath) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' }}" alt="{{ $siteTitle }}">
                     <div class="destination-overlay">
                         <h3>{{ $siteTitle }}</h3>
@@ -907,7 +907,7 @@
                         $resortTitle = ucwords(str_replace(['-', '_'], ' ', pathinfo($resortImagePath, PATHINFO_FILENAME)));
                     }
                 @endphp
-                <div class="feature-card animate-on-scroll requires-auth" role="button" tabindex="0">
+                <div class="feature-card animate-on-scroll requires-auth" role="button" tabindex="0" data-href="{{ route('resorts.show', $resort->id) }}">
                     <img src="{{ $resortImagePath ? asset($resortImagePath) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' }}" alt="{{ $resortTitle }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
                     <h3>{{ $resortTitle }}</h3>
                     <p>{{ Str::limit($resort->description, 80) ?? 'Experience comfort and relaxation at this resort.' }}</p>
@@ -933,7 +933,7 @@
             </div>
             <div class="features-grid">
                 @forelse($events as $event)
-                <div class="feature-card animate-on-scroll requires-auth" role="button" tabindex="0" style="text-align: left;">
+                <div class="feature-card animate-on-scroll requires-auth" role="button" tabindex="0" style="text-align: left;" data-href="{{ route('events.show', $event->id) }}">
                     @if($event->image)
                     <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->name }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
                     @elseif($galleryCount)
@@ -1180,17 +1180,25 @@
             card.addEventListener('click', function() {
                 if (isGuestUser) {
                     openAuthModal();
+                } else {
+                    const href = this.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href;
+                    }
                 }
             });
 
             card.addEventListener('keydown', function(e) {
-                if (!isGuestUser) {
-                    return;
-                }
-
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    openAuthModal();
+                    if (isGuestUser) {
+                        openAuthModal();
+                    } else {
+                        const href = this.getAttribute('data-href');
+                        if (href) {
+                            window.location.href = href;
+                        }
+                    }
                 }
             });
         });

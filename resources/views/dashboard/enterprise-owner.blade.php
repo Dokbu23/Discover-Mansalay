@@ -18,7 +18,7 @@
     $gcashNumber = config('payments.gcash_number', '');
 @endphp
 
-@if(!Auth::user()->hasVerifiedVendorPayment())
+@if(!Auth::user()->is_approved && !Auth::user()->hasVerifiedVendorPayment())
 <!-- Vendor Approval Fee -->
 <div class="card" style="margin-bottom: 2rem; border-left: 4px solid #0ea5e9;">
     <div class="card-body">
@@ -78,7 +78,7 @@
                     {{ $vendor->address ?? 'No address set' }}
                 </p>
             </div>
-            <a href="{{ route('vendors.edit', $vendor) }}" class="btn btn-secondary">Edit Profile</a>
+            <a href="{{ route('vendors.settings') }}" class="btn btn-secondary">Edit Profile</a>
         </div>
     </div>
 </div>
@@ -199,7 +199,7 @@
         </svg>
         <h3 style="margin: 0 0 0.5rem 0;">Set Up Your Business</h3>
         <p style="color: #6b7280; margin-bottom: 1.5rem;">Create your vendor profile to start adding products and reach tourists in Mansalay.</p>
-        <a href="{{ route('vendors.create') }}" class="btn btn-primary btn-lg">Create Vendor Profile</a>
+        <a href="{{ route('vendors.settings') }}" class="btn btn-primary btn-lg">Create Vendor Profile</a>
     </div>
 </div>
 @endif

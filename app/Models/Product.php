@@ -11,6 +11,7 @@ class Product extends Model
 
     protected $fillable = [
         'vendor_id',
+        'uploaded_by_user_id',
         'name',
         'description',
         'price',
@@ -33,5 +34,10 @@ class Product extends Model
     public function vendor()
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
 }

@@ -9,8 +9,60 @@ use Illuminate\Support\Facades\Storage;
 
 class VendorController extends Controller
 {
+    public function settings()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user->isEnterpriseOwner()) {
+            abort(403);
+        }
+
+        $vendor = Vendor::where('user_id', $user->id)->first();
+
+        return view('dashboard.vendors.settings', compact('vendor'));
+    }
+
+    public function saveSettings(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user->isEnterpriseOwner()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:50',
+            'type' => 'required|in:awati,pasalubong_center,other',
+            'logo' => 'nullable|image|max:2048',
+            'is_active' => 'boolean',
+        ]);
+
+        $vendor = Vendor::firstOrNew(['user_id' => $user->id]);
+        $validated['is_active'] = $request->has('is_active');
+
+        if ($request->hasFile('logo')) {
+            if ($vendor->logo) {
+                Storage::disk('public')->delete($vendor->logo);
+            }
+
+            $validated['logo'] = $request->file('logo')->store('vendors', 'public');
+        }
+
+        $vendor->fill($validated);
+        $vendor->user_id = $user->id;
+        $vendor->save();
+
+        return redirect()->route('vendors.settings')->with('success', 'Vendor settings saved successfully!');
+    }
+
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if ($user->isAdmin()) {
@@ -29,6 +81,9 @@ class VendorController extends Controller
 
     public function store(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -39,7 +94,7 @@ class VendorController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        $validated['user_id'] = $user->id;
         $validated['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('logo')) {

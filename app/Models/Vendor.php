@@ -17,6 +17,11 @@ class Vendor extends Model
         'contact_number',
         'logo',
         'type',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function user()

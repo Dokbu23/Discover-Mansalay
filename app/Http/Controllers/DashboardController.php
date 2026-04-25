@@ -146,7 +146,13 @@ class DashboardController extends Controller
             return view('dashboard.enterprise-owner', compact('stats', 'vendor', 'products', 'galleryImages'));
         }
 
-        $products = $vendor->products()->latest()->get();
+        $products = $vendor->products()
+            ->where(function ($query) use ($user) {
+                $query->where('uploaded_by_user_id', $user->id)
+                    ->orWhereNull('uploaded_by_user_id');
+            })
+            ->latest()
+            ->get();
         
         $stats = [
             'products' => $products->count(),

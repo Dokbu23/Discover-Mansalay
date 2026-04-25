@@ -98,6 +98,13 @@
             font-weight: 700;
             font-size: 1.25rem;
             color: #be185d;
+            overflow: hidden;
+        }
+
+        .user-avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-details h4 {
@@ -772,14 +779,29 @@
 </head>
 <body data-payment-success="{{ session('payment_success') }}">
     @php
-        $showVendorPaymentModal = Auth::check() && Auth::user()->isVendorRole() && !Auth::user()->hasVerifiedVendorPayment();
+        $authUser = Auth::user();
+        $vendorProfile = Auth::check() ? $authUser->vendor : null;
+        $showVendorPaymentModal = Auth::check()
+            && $authUser->isVendorRole()
+            && !$authUser->is_approved
+            && !$authUser->hasVerifiedVendorPayment();
+        $showVendorProfileSetupModal = Auth::check()
+            && $authUser->isEnterpriseOwner()
+            && $authUser->is_approved
+            && $authUser->hasVerifiedVendorPayment()
+            && !request()->routeIs('vendors.settings')
+            && !$vendorProfile;
         $vendorPaymentFee = config('payments.vendor_approval_fee', 0);
         $gcashName = config('payments.gcash_name', '');
         $gcashNumber = config('payments.gcash_number', '');
-        $vendorRoleLabel = Auth::check() && Auth::user()->isResortOwner() ? 'Resort Owner' : 'Vendor';
+        $vendorRoleLabel = Auth::check() && $authUser->isResortOwner() ? 'Resort Owner' : 'Vendor';
+        $isOwnedVendorProfile = Auth::check()
+            && $authUser->isEnterpriseOwner()
+            && $vendorProfile
+            && (int) $vendorProfile->user_id === (int) $authUser->id;
     @endphp
 
-    @if($showVendorPaymentModal)
+    @if($showVendorPaymentModal || $showVendorProfileSetupModal)
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 document.body.classList.add('vendor-payment-locked');
@@ -798,10 +820,22 @@
 
         <div class="sidebar-scrollable">
         <div class="user-info">
-            <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+            <div class="user-avatar">
+                @if(Auth::user()->isEnterpriseOwner() && $vendorProfile && $vendorProfile->logo)
+                    <img src="{{ asset('storage/' . $vendorProfile->logo) }}" alt="{{ $vendorProfile->name }}" class="user-avatar-image">
+                @else
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                @endif
+            </div>
             <div class="user-details">
                 <h4>{{ Auth::user()->name }}</h4>
-                <p>{{ ucfirst(str_replace('_', ' ', Auth::user()->role ?? 'tourist')) }}</p>
+                <p>
+                    @if(Auth::user()->isEnterpriseOwner() && $vendorProfile)
+                        {{ $vendorProfile->name }}
+                    @else
+                        {{ ucfirst(str_replace('_', ' ', Auth::user()->role ?? 'tourist')) }}
+                    @endif
+                </p>
             </div>
         </div>
 
@@ -813,13 +847,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
                 <span>Dashboard</span>
-            </a>
-
-            <a href="/" class="nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                </svg>
-                <span>View Website</span>
             </a>
 
             @if(Auth::user()->isAdmin())
@@ -861,7 +888,7 @@
                 <span>Events</span>
             </a>
 
-            <a href="{{ route('vendors.index') }}" class="nav-item {{ request()->routeIs('vendors.*') ? 'active' : '' }}">
+            <a href="{{ route('vendors.index') }}" class="nav-item {{ request()->routeIs('vendors.index') || request()->routeIs('vendors.create') || request()->routeIs('vendors.edit') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
@@ -918,19 +945,21 @@
             @if(Auth::user()->isEnterpriseOwner())
             <p class="nav-section">Business Management</p>
 
-            <a href="{{ route('vendors.index') }}" class="nav-item {{ request()->routeIs('vendors.*') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-                <span>My Business</span>
-            </a>
+            @if($isOwnedVendorProfile)
+                <a href="{{ route('vendors.index') }}" class="nav-item {{ request()->routeIs('vendors.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span>My Business</span>
+                </a>
 
-            <a href="{{ route('products.index') }}" class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <span>Products</span>
-            </a>
+                <a href="{{ route('products.index') }}" class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Products</span>
+                </a>
+            @endif
 
             <a href="{{ route('orders.index') }}" class="nav-item {{ request()->routeIs('orders.*') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -944,6 +973,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
                 <span>Inquiries</span>
+            </a>
+
+            <a href="{{ route('vendors.settings') }}" class="nav-item {{ request()->routeIs('vendors.settings') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1 1 0 00.95.69h.78c.969 0 1.371 1.24.588 1.81l-.63.458a1 1 0 00-.364 1.118l.24.738c.3.922-.755 1.688-1.54 1.118l-.63-.458a1 1 0 00-1.176 0l-.63.458c-.784.57-1.838-.196-1.539-1.118l.24-.738a1 1 0 00-.364-1.118l-.63-.458c-.783-.57-.38-1.81.588-1.81h.78a1 1 0 00.95-.69zM12 15a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <span>Settings</span>
             </a>
             @endif
 
@@ -1178,6 +1214,20 @@
                         <button type="submit" class="btn btn-secondary" style="width: 100%;">Log Out</button>
                     </form>
                 @endif
+            </div>
+        </div>
+    @endif
+
+    @if($showVendorProfileSetupModal)
+        <div class="vendor-payment-backdrop" role="dialog" aria-modal="true" aria-label="Vendor profile setup">
+            <div class="vendor-payment-modal">
+                <h2>Setting Up Your Profile</h2>
+                <p>Your payment is verified and account is approved. Complete your business profile to start posting products.</p>
+                <div class="vendor-payment-details">
+                    <div><strong>Next Step:</strong> Create your vendor profile</div>
+                    <div><strong>Includes:</strong> Business name, type, address, contact, and logo</div>
+                </div>
+                <a href="{{ route('vendors.settings') }}" class="btn btn-primary" style="width: 100%; text-align: center;">Set Up My Vendor Profile</a>
             </div>
         </div>
     @endif

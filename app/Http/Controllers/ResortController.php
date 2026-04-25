@@ -5,10 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\Resort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class ResortController extends Controller
 {
+    private function getGalleryImages()
+    {
+        $galleryImages = [];
+        $imageDirectory = public_path('images');
+
+        if (File::exists($imageDirectory)) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+
+            foreach (File::allFiles($imageDirectory) as $imageFile) {
+                if (stripos($imageFile->getFilename(), 'logo') !== false) {
+                    continue;
+                }
+
+                if (in_array(strtolower($imageFile->getExtension()), $allowedExtensions, true)) {
+                    $galleryImages[] = 'images/' . str_replace('\\', '/', $imageFile->getRelativePathname());
+                }
+            }
+
+            sort($galleryImages);
+        }
+
+        return $galleryImages;
+    }
+
     private function ensureCanManageResorts()
     {
         /** @var \App\Models\User|null $user */
@@ -31,6 +56,12 @@ class ResortController extends Controller
         }
 
         return view('dashboard.resorts.index', compact('resorts'));
+    }
+
+    public function show(Resort $resort)
+    {
+        $galleryImages = $this->getGalleryImages();
+        return view('dashboard.resorts.show', compact('resort', 'galleryImages'));
     }
 
     public function create()

@@ -63,8 +63,20 @@ class ProductController extends Controller
         if ($user->isAdmin()) {
             $products = Product::with('vendor')->latest()->paginate(10);
         } elseif ($user->isEnterpriseOwner()) {
-            $vendorIds = Vendor::where('user_id', $user->id)->pluck('id');
-            $products = Product::with('vendor')->whereIn('vendor_id', $vendorIds)->latest()->paginate(10);
+            $products = Product::with('vendor')
+                ->where(function ($query) use ($user) {
+                    $query->where('uploaded_by_user_id', $user->id)
+                        ->orWhere(function ($fallback) use ($user) {
+                            $fallback->whereNull('uploaded_by_user_id')
+                                ->whereHas('vendor', function ($vendorQuery) use ($user) {
+                                    $vendorQuery->where('user_id', $user->id);
+                                });
+                        });
+                })
+                ->latest()
+                ->paginate(10);
+        } elseif (!$user->isTourist()) {
+            abort(403);
         } else {
             // Tourists browse approved, available products from all vendors.
             $touristProductsQuery = Product::with('vendor')
@@ -203,6 +215,17 @@ class ProductController extends Controller
 
         if ($user->isTourist()) {
             $this->ensureShopProductVisible($product);
+        } elseif ($user->isEnterpriseOwner()) {
+            $product->loadMissing('vendor');
+            $ownsLegacyProduct = is_null($product->uploaded_by_user_id)
+                && $product->vendor
+                && (int) $product->vendor->user_id === (int) $user->id;
+
+            if ((int) $product->uploaded_by_user_id !== (int) $user->id && !$ownsLegacyProduct) {
+                abort(404);
+            }
+        } elseif (!$user->isAdmin()) {
+            abort(403);
         }
 
         $product->load('vendor');
@@ -322,22 +345,35 @@ class ProductController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Product::class);
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $currentVendor = null;
 
         if ($user->isAdmin()) {
             $vendors = Vendor::all();
         } else {
-            $vendors = Vendor::where('user_id', $user->id)->get();
+            $vendors = collect();
+            $currentVendor = Vendor::where('user_id', $user->id)->first();
+
+            if (!$currentVendor) {
+                return redirect()->route('vendors.settings')
+                    ->with('error', 'No vendor profile is linked to your account.');
+            }
         }
 
-        return view('dashboard.products.create', compact('vendors'));
+        return view('dashboard.products.create', compact('vendors', 'currentVendor'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Product::class);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         $validated = $request->validate([
-            'vendor_id' => 'required|exists:vendors,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
@@ -347,6 +383,31 @@ class ProductController extends Controller
             'is_available' => 'boolean',
         ]);
 
+        if ($user->isAdmin()) {
+            $vendorData = $request->validate([
+                'vendor_id' => 'required|exists:vendors,id',
+            ]);
+
+            $validated['vendor_id'] = (int) $vendorData['vendor_id'];
+        } else {
+            $vendorNameData = $request->validate([
+                'vendor_name' => 'required|string|max:255',
+            ]);
+
+            $vendorId = Vendor::where('user_id', $user->id)->value('id');
+
+            if (!$vendorId) {
+                return redirect()->route('vendors.settings')
+                    ->with('error', 'No vendor profile is linked to your account.');
+            }
+
+            $validated['vendor_id'] = (int) $vendorId;
+
+            Vendor::where('id', $vendorId)->update([
+                'name' => trim((string) $vendorNameData['vendor_name']),
+            ]);
+        }
+
         $validated['is_available'] = $request->has('is_available');
 
         if ($request->hasFile('image')) {
@@ -354,14 +415,14 @@ class ProductController extends Controller
         }
 
         // Auto-approve if created by admin
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
         if ($user->isAdmin()) {
             $validated['is_approved'] = true;
             $validated['approved_at'] = now();
         } else {
             $validated['is_approved'] = false;
         }
+
+        $validated['uploaded_by_user_id'] = $user->id;
 
         Product::create($validated);
 
@@ -374,22 +435,30 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        $this->authorize('update', $product);
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $currentVendor = null;
 
         if ($user->isAdmin()) {
             $vendors = Vendor::all();
         } else {
-            $vendors = Vendor::where('user_id', $user->id)->get();
+            $vendors = collect();
+            $currentVendor = $product->vendor;
         }
 
-        return view('dashboard.products.edit', compact('product', 'vendors'));
+        return view('dashboard.products.edit', compact('product', 'vendors', 'currentVendor'));
     }
 
     public function update(Request $request, Product $product)
     {
+        $this->authorize('update', $product);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         $validated = $request->validate([
-            'vendor_id' => 'required|exists:vendors,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
@@ -398,6 +467,24 @@ class ProductController extends Controller
             'image' => 'nullable|image|max:2048',
             'is_available' => 'boolean',
         ]);
+
+        if ($user->isAdmin()) {
+            $vendorData = $request->validate([
+                'vendor_id' => 'required|exists:vendors,id',
+            ]);
+
+            $validated['vendor_id'] = (int) $vendorData['vendor_id'];
+        } else {
+            $vendorNameData = $request->validate([
+                'vendor_name' => 'required|string|max:255',
+            ]);
+
+            $validated['vendor_id'] = (int) $product->vendor_id;
+
+            Vendor::where('id', $product->vendor_id)->update([
+                'name' => trim((string) $vendorNameData['vendor_name']),
+            ]);
+        }
 
         $validated['is_available'] = $request->has('is_available');
 
@@ -415,6 +502,8 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        $this->authorize('delete', $product);
+
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
