@@ -358,9 +358,15 @@ class SampleDataSeeder extends Seeder
             $vendor = Vendor::where('name', $productData['vendor_name'])->first();
             if ($vendor) {
                 unset($productData['vendor_name']);
-                Product::firstOrCreate(
+                Product::updateOrCreate(
                     ['name' => $productData['name'], 'vendor_id' => $vendor->id],
-                    array_merge($productData, ['vendor_id' => $vendor->id])
+                    array_merge($productData, [
+                        'vendor_id' => $vendor->id,
+                        'uploaded_by_user_id' => $vendor->user_id,
+                        'is_approved' => true,
+                        'approved_at' => now(),
+                        'rejection_reason' => null,
+                    ])
                 );
             }
         }
